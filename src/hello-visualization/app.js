@@ -6,7 +6,8 @@ import enigma from 'enigma.js';
 import enigmaMixin from 'halyard.js/dist/halyard-enigma-mixin';
 import qixSchema from 'enigma.js/schemas/3.2.json';
 import template from './app.html';
-import Scatterplot from './scatterplot';
+//import Scatterplot from './scatterplot';
+import Barchart from './barchart';
 import Linechart from './linechart';
 import 'babel-polyfill';
 
@@ -32,68 +33,156 @@ angular.module('app', []).component('app', {
     this.connected = false;
     this.painted = false;
     this.connecting = true;
+    this.logined=false;
+    this.validEP=true;
 
     let app = null;
-    let scatterplotObject = null;
+    //let scatterplotObject = null;
+    let barchartObject = null;
     let linechartObject = null;
+    let callObject=null;
+
+    //chart origion filter
+    let chartFilter={origion:"NationalAndInternational",fromDate:null,toDate:null};
 
     const select = async (value) => {
-      const field = await app.getField('Movie');
-      field.select(value);
+      
+     // const field = await app.getField('AuthCodeDescription');
+      //console.log(field);
+      //field.select(value);
+
       $scope.dataSelected = true;
-      const layout = await this.getMovieInfo();
-      Scatterplot.showDetails(layout);
+      const layout = await this.getCallInfo();
+      Barchart.showCallDetails(layout,value,chartFilter);
       $scope.showFooter = true;
       $scope.$digest();
     };
 
-    const scatterplotProperties = {
+    // const scatterplotProperties = {
+    //   qInfo: {
+    //     qType: 'visualization',
+    //     qId: '',
+    //   },
+    //   type: 'my-picasso-scatterplot',
+    //   labels: true,
+    //   qHyperCubeDef: {
+    //     qDimensions: [{
+    //       qDef: {
+    //         qFieldDefs: ['CallId'],
+            
+    //         qSortCriterias: [{
+    //           qSortByExpression: 1,
+    //           qExpression: {
+    //           qv: "Duration"
+    //           }
+    //         }]
+    //       },
+    //     }],
+    //     qMeasures: [{
+    //       qDef: {
+    //         qDef: '[AuthCodeDescription]',
+    //         qLabel: 'AuthCodeDescription'
+            
+    //       }
+    //     },
+    //     {
+    //       qDef: {
+    //         qDef: '[Duration]',
+    //         qLabel: 'Duration'
+    //       },
+    //       qSortBy: {
+    //         qSortByNumeric: 1,
+    //       },
+    //     }],
+    //     qInitialDataFetch: [{
+    //       qTop: 0, qHeight: 50, qLeft: 0, qWidth: 3,
+    //     }],
+    //     qSuppressZero: false,
+    //     qSuppressMissing: true,
+    //   },
+    // };
+
+    // const scatterplot = new Scatterplot();
+
+    // const paintScatterPlot = (layout) => {
+    //   scatterplot.paintScatterplot(document.getElementById('chart-container-scatterplot'), layout, {
+    //     select,
+    //     clear: () => this.clearAllSelections(),
+    //     hasSelected: $scope.dataSelected,
+    //   });
+    //   this.painted = true;
+    // };
+
+
+
+    const barchartProperties = {
       qInfo: {
         qType: 'visualization',
         qId: '',
       },
-      type: 'my-picasso-scatterplot',
+      type: 'my-picasso-barchart',
       labels: true,
       qHyperCubeDef: {
         qDimensions: [{
           qDef: {
-            qFieldDefs: ['Movie'],
+            qFieldDefs: ['AuthCodeDescription'],
             qSortCriterias: [{
-              qSortByAscii: 1,
-            }],
-          },
-        }],
-        qMeasures: [{
-          qDef: {
-            qDef: '[Adjusted Costs]',
-            qLabel: 'Adjusted cost ($)',
-          },
-          qSortBy: {
-            qSortByNumeric: -1,
+            qSortByExpression: 1,
+            qExpression: {
+                qv: "Duration"
+              }
+            }]
           },
         },
         {
           qDef: {
-            qDef: '[imdbRating]',
-            qLabel: 'imdb rating',
+            qFieldDefs: ['DateTime'],
+            qSortCriterias: [{
+            qSortByExpression: 1,
+            qExpression: {
+                qv: "Duration"
+              }
+            }]
           },
-        }],
+        },
+        {
+          qDef: {
+            qFieldDefs: ['CallType'],
+            qSortCriterias: [{
+            qSortByExpression: 1,
+            qExpression: {
+                qv: "Duration"
+              }
+            }]
+          },
+        }
+      ],
+        qMeasures: [{
+          qDef: {
+            qDef: 'Sum([Duration])/60',
+            qLabel: 'Duration'
+          },
+          qSortBy: {
+            qSortByNumeric: 1,
+          },
+        }
+      ],
         qInitialDataFetch: [{
-          qTop: 0, qHeight: 50, qLeft: 0, qWidth: 3,
+          qTop: 0, qHeight: 2500, qLeft: 0, qWidth: 4,
         }],
-        qSuppressZero: false,
+        qSuppressZero: true,
         qSuppressMissing: true,
       },
     };
 
-    const scatterplot = new Scatterplot();
+    const barchart = new Barchart();
+    const paintBarChart = (layout) => {
 
-    const paintScatterPlot = (layout) => {
-      scatterplot.paintScatterplot(document.getElementById('chart-container-scatterplot'), layout, {
-        select,
-        clear: () => this.clearAllSelections(),
-        hasSelected: $scope.dataSelected,
-      });
+      barchart.paintBarChart(document.getElementById('chart-container-barchart'), layout, {
+            select,
+            clear: () => this.clearAllSelections(),
+            hasSelected: $scope.dataSelected,
+          },chartFilter);
       this.painted = true;
     };
 
@@ -112,29 +201,45 @@ angular.module('app', []).component('app', {
               qSortByAscii: 1,
             }],
           },
-        }],
-        qMeasures: [{
+        },
+        {
           qDef: {
-            qDef: 'Sum([Adjusted Costs])',
-            qLabel: 'Adjusted Costs in total ($)',
-          },
-          qSortBy: {
-            qSortByNumeric: -1,
+            qFieldDefs: ['DateTime'],
+            qSortCriterias: [{
+              qSortByAscii: 1,
+            }],
           },
         },
-        ],
-        qInitialDataFetch: [{
-          qTop: 0, qHeight: 50, qLeft: 0, qWidth: 3,
+        {
+          qDef: {
+            qFieldDefs: ['CallType'],
+            qSortCriterias: [{
+              qSortByAscii: 1,
+            }],
+          },
+        }
+      ],
+        qMeasures: [{
+          qDef: {
+            qDef: 'Sum([Duration])/60',
+            qLabel: 'Duration'
+          },
+          qSortBy: {
+            qSortByNumeric: 1,
+          },
         }],
-        qSuppressZero: false,
-        qSuppressMissing: false,
+        qInitialDataFetch: [{
+          qTop: 0, qHeight: 2500, qLeft: 0, qWidth: 4,
+        }],
+        qSuppressZero: true,
+        qSuppressMissing: true,
       },
     };
 
     const linechart = new Linechart();
 
     const paintLineChart = (layout) => {
-      linechart.paintLinechart(document.getElementById('chart-container-linechart'), layout);
+      linechart.paintLinechart(document.getElementById('chart-container-linechart'), layout,chartFilter);
       this.painted = true;
     };
 
@@ -153,27 +258,43 @@ angular.module('app', []).component('app', {
         mixins: enigmaMixin,
         url: `ws://${window.location.hostname}:19076/app/${this.generateGUID()}`,
       };
+      
+      //Add local data: Calls 2
+      // const filePathMetrics2 = '/data/MOCK_DATA_3.csv'
+      
 
-      // Add local data
-      const filePathMovie = '/data/movies.csv';
-      const tableMovie = new Halyard.Table(filePathMovie, {
-        name: 'Movies',
+      // const tableMetrics2 = new Halyard.Table(filePathMetrics2, {
+      //   name: 'Calls',
+      //   fields: [
+      //     {src: 'globalCallID_callId', name:'CallId', type: 'string'},
+      //     //{src: 'dateTimeOrigination', name: 'DateTime', type: 'timeStamp' },
+      //     //{src: 'Year', name:'Year'},
+      //     {expr: "TimeStamp(Date#('19700101', 'YYYYMMDD') + ([dateTimeOrigination] / 86400))", name:'DateTime'},
+      //     {expr: "Year(TimeStamp(Date#('19700101', 'YYYYMMDD') + ([dateTimeOrigination] / 86400)))", name:'Year'},
+      //     {src: 'duration', name: 'Duration' },
+      //     {src: 'authCodeDescription', name: 'AuthCodeDescription'},
+      //     {src: 'originalCalledPartyNumberPartition', name: 'CallType'}
+      //   ]
+      // });
+
+      const tableMetrics2 = new Halyard.Table('/data/newData2.csv', {
+        name: 'Calls',
         fields: [
-          { src: 'Movie', name: 'Movie' },
-          { src: 'Year', name: 'Year' },
-          { src: 'Adjusted Costs', name: 'Adjusted Costs' },
-          { src: 'Description', name: 'Description' },
-          { src: 'Image', name: 'Image' },
-        ],
-        delimiter: ',',
+          {src: 'globalCallID_callId', name:'CallId', type: 'string'},
+          //{src: 'dateTimeOrigination', name: 'DateTime', type: 'timeStamp' },
+          //{src: 'Year', name:'Year'},
+          {expr: "TimeStamp(Date#('19700101', 'YYYYMMDD') + ([dateTimeOrigination] / 86400))", name:'DateTime'},
+          {expr: "Year(TimeStamp(Date#('19700101', 'YYYYMMDD') + ([dateTimeOrigination] / 86400)))", name:'Year'},
+          {src: 'duration', name: 'Duration' },
+          {src: 'authCodeDescription', name: 'AuthCodeDescription',},
+          {src: 'originalCalledPartyNumberPartition', name: 'CallType'}
+        ]
       });
-      halyard.addTable(tableMovie);
 
+      halyard.addTable(tableMetrics2);
+      
       // Add web data
       (async () => {
-        const data = await $http.get('https://gist.githubusercontent.com/carlioth/b86ede12e75b5756c9f34c0d65a22bb3/raw/e733b74c7c1c5494669b36893a31de5427b7b4fc/MovieInfo.csv');
-        const table = new Halyard.Table(data.data, { name: 'MoviesInfo', delimiter: ';', characterSet: 'utf8' });
-        halyard.addTable(table);
         let qix;
         try {
           qix = await enigma.create(config).open();
@@ -182,26 +303,44 @@ angular.module('app', []).component('app', {
         } catch (error) {
           this.error = 'Could not connect to QIX Engine';
           this.connecting = false;
+          console.log('Could not connect to QIX Engine');
         }
 
         try {
           app = await qix.createSessionAppUsingHalyard(halyard);
         } catch (error) {
+          console.log(error);
           this.error = 'Could not create session app';
           this.connected = false;
           this.connecting = false;
+          console.log('Could not connect to QIX Engine');
         }
-        await app.getAppLayout();
+       await app.getAppLayout();
 
-        scatterplotObject = await app.createSessionObject(scatterplotProperties);
 
-        const updateScatterPlot = (async () => {
-          const layout = await scatterplotObject.getLayout();
-          paintScatterPlot(layout);
+
+        // scatterplotObject = await app.createSessionObject(scatterplotProperties);
+
+        // const updateScatterPlot = (async () => {
+        //    const layout = await scatterplotObject.getLayout();
+        //    paintScatterPlot(layout);
+        // });
+
+        // scatterplotObject.on('changed', updateScatterPlot);
+        // updateScatterPlot();
+
+
+
+
+
+        barchartObject = await app.createSessionObject(barchartProperties);
+        const updateBarChart = (async () => {
+          const layout = await barchartObject.getLayout();
+          paintBarChart(layout);
         });
 
-        scatterplotObject.on('changed', updateScatterPlot);
-        updateScatterPlot();
+        barchartObject.on('change', updateBarChart);
+        updateBarChart();
 
         linechartObject = await app.createSessionObject(linechartProperties);
         const linechartUpdate = (async () => {
@@ -211,6 +350,105 @@ angular.module('app', []).component('app', {
 
         linechartObject.on('changed', linechartUpdate);
         linechartUpdate();
+
+        document.getElementById('bothOrigion').addEventListener("click", function(){
+          chartFilter.origion="NationalAndInternational"
+          updateBarChart();
+          linechartUpdate();
+        });
+        document.getElementById('nationalOrigion').addEventListener("click", function(){
+          chartFilter.origion="National"
+          updateBarChart();
+          linechartUpdate();
+        });
+        document.getElementById('internationalOrigion').addEventListener("click", function(){
+          chartFilter.origion="International";
+          updateBarChart();
+          linechartUpdate();
+        });
+        document.getElementById("dateFrom").addEventListener("change",function(){
+          let v= document.getElementById("dateFrom").value;
+          if(v+""!=""){
+            var d=new Date(v);
+            d.setHours(0);
+            d.setMinutes(0);
+            d.setSeconds(0);
+            chartFilter.fromDate=d;
+          }
+          else{
+            chartFilter.fromDate=null;
+          }
+          updateBarChart();
+          linechartUpdate();
+        });
+        document.getElementById("dateTo").addEventListener("change",function(){
+          let v= document.getElementById("dateTo").value;
+          if(v.value+""!=""){
+            var d=new Date(v);
+            d.setHours(0);
+            d.setMinutes(0);
+            d.setSeconds(0);
+            chartFilter.toDate=d;
+
+          }else{
+            chartFilter.toDate=null;
+          }
+          updateBarChart();
+          linechartUpdate();
+        });
+
+        const LoginNow=()=>{
+          chartFilter.origion="NationalAndInternational"
+          updateBarChart();
+          linechartUpdate();
+          this.logined=true;
+          this.validEP=true;
+          localStorage.setItem("logined","true");
+        }
+
+        const CheckLogin=()=>{
+          var item= localStorage.getItem("logined");
+          if(item=="true"){
+            LoginNow();
+          }
+        }
+        CheckLogin();
+        $scope.logoutNow=()=>{
+          this.logined=false;
+          this.validEP=true;
+          localStorage.removeItem("logined");
+        }
+        $scope.PrintDetails=()=>
+        {
+            var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+        
+            mywindow.document.write('<html><head><title>ROSHN - Calls Log</title>');
+            mywindow.document.write('</head><body >');
+            mywindow.document.write('<h1>ROSHN - Calls Log</h1>');
+            mywindow.document.write(document.getElementsByClassName('info-wrapper')[0].innerHTML);
+            mywindow.document.write('</body></html>');
+        
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+        
+            mywindow.print();
+            mywindow.close();
+        
+            return true;
+        }
+
+        $scope.login = () => {
+          var email= document.getElementById("email").value;
+          var password= document.getElementById("password").value;
+          if(email=="user@gmail.com"&&password=="123"){
+            LoginNow();
+          }
+          else{
+            this.validEP=false;
+          }
+
+        };
+
       })();
     };
 
@@ -222,49 +460,55 @@ angular.module('app', []).component('app', {
       $scope.showFooter = false;
     };
 
-    this.getMovieInfo = async () => {
-      const tableProperties = {
+    this.getCallInfo = async () => {
+      const fullDataProperties = {
         qInfo: {
           qType: 'visualization',
           qId: '',
         },
-        type: 'my-info-table',
+        type: 'my-picasso-barchart',
         labels: true,
         qHyperCubeDef: {
           qDimensions: [{
             qDef: {
-              qFieldDefs: ['Movie'],
+              qFieldDefs: ['AuthCodeDescription'],
             },
           },
           {
             qDef: {
-              qFieldDefs: ['Image'],
+              qFieldDefs: ['DateTime']
             },
           },
           {
             qDef: {
-              qFieldDefs: ['Year'],
+              qFieldDefs: ['CallType']
             },
           },
-          {
+                  {
             qDef: {
-              qFieldDefs: ['Genre'],
+              qFieldDefs: ['Duration']
             },
-          },
-          {
+          }
+          
+        ],
+          qMeasures: [{
             qDef: {
-              qFieldDefs: ['Description'],
+              qDef: '[Duration]',
+              qLabel: 'Duration'
             },
-          },
-          ],
+            qSortBy: {
+              qSortByNumeric: 1,
+            },
+          }
+        ],
           qInitialDataFetch: [{
-            qTop: 0, qHeight: 50, qLeft: 0, qWidth: 50,
+            qTop: 0, qHeight: 2500, qLeft: 0, qWidth: 4,
           }],
-          qSuppressZero: false,
+          qSuppressZero: true,
           qSuppressMissing: true,
         },
       };
-      const model = await app.createSessionObject(tableProperties);
+      const model = await app.createSessionObject(fullDataProperties);
       return model.getLayout();
     };
   }],

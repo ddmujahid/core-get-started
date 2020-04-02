@@ -1,49 +1,137 @@
-<div class="header">
-  <div class="left-content">
-    <span class="qliktive">Qliktive</span>
-    <span class="hello-visualization">Hello Visualization</span>
-  </div>
-  <div class="right-content">
-    <div class="clear-selections" ng-click="$ctrl.clearAllSelections()" ng-class="{'disabled': !dataSelected}">Clear selections</div>
-    <img class="git-hub-icon" src="src/hello-visualization/resources/github-social-logo.svg" ng-click="openGithub()" title="Open GitHub project">
-  </div>
-</div>
-<div class="content" ng-click="$ctrl.clearAllSelections()">
-  <div class="container" ng-if="$ctrl.connected">
-    <div class="title">Top 50 most expensive movies</div>
-    <div>Comparison of top 50 most expensive movies and their imdb ratings</div>
-    <div id="chart-container-scatterplot" class="picasso-scatterplot"></div>
-  </div>
-  <div class="container" ng-if="$ctrl.connected">
-    <div>Total cost distributed over time</div>
-    <div id="chart-container-linechart" class="picasso-linechart"></div>
-  </div>
-</div>
-<div class="footer" ng-class="{'expanded': showFooter}">
-  <div>
-    <span class="lui-icon--top" ng-class="{'expanded': showFooter}" ng-click="toggleFooter()"></span>
-    <span class="footer-title">Movie Information</span>
-  </div>
-  <div class="info-wrapper" ng-show="dataSelected">
-    <img class="movie-image">
-    <div class="movie-info">
-      <span class="info-title">Title</span>
-      <span class="movie-title"></span>
-      <span class="info-title">Year</span>
-      <span class="movie-year"></span>
-      <span class="info-title">Genre</span>
-      <span class="movie-genre"></span>
-      <span class="info-title">Description</span>
-      <span class="movie-description"></span>
+<style>
+  .hide {
+    display: none;
+  }
+
+  .header {
+    height: 120px !important;
+    background: #fff !important;
+    color: #256A65 !important;
+
+    font-size: 0.875rem !important;
+    line-height: 1.78571 !important;
+    color: #256a65 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .qliktive {
+    font-size: 0.975rem !important;
+    line-height: 1.78571 !important;
+    color: #256a65 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .middle-content {
+    background-color: #fff;
+    max-width: 18%;
+    width: 187px;
+  }
+
+  .clear-selections {
+    color: #256A65 !important;
+  }
+
+  .content {
+    background: #256A65 !important;
+  }
+
+  .container {
+    padding-top: 10px !important;
+  }
+
+  .footer {
+    background: #fff !important;
+    color: #256A65 !important;
+  }
+</style>
+
+  <div class="header">
+    <div class="left-content">
+      <span class="qliktive">ROSHN</span>
+      <span class="hello-visualization">Visualization</span>
+    </div>
+    <div class="middle-content">
+      <img src="src/hello-visualization/resources/logo-wide.svg" />
+    </div>
+    <div class="right-content">
+      <div style="padding: 7px 13px;"><button ng-click="logoutNow()"  ng-class="{ 'hide': !$ctrl.logined}">Logout</button></div>
+      <!-- <div class="clear-selections" ng-click="$ctrl.clearAllSelections()" ng-class="{'disabled': !dataSelected}">Clear selections</div>
+     <img class="git-hub-icon" src="src/hello-visualization/resources/github-social-logo.svg" ng-click="openGithub()" title="Open GitHub project"> -->
     </div>
   </div>
-  <div class="no-movie-selected" ng-show="!dataSelected">No movie is selected</div>
+  <div class="content" ng-class="{ 'hide': !$ctrl.logined}">
+    <div class="container" ng-if="$ctrl.connected">
+      <div class="title"></div>
+      <div style="margin-top: 400px;">
+        <div>
+          <input id="chk_national" type="radio" value="national" name="origion">
+          <label for="chk_national" id="nationalOrigion">National</label>
+          <input id="chk_international" type="radio" value="international" name="origion">
+          <label for="chk_international" id="internationalOrigion">International</label>
+          <input id="chk_both" type="radio" value="both" name="origion" checked>
+          <label for="chk_both" id="bothOrigion">Both</label>
+        </div>
+        <div style="padding: 10px;">
+          <label for="dateFrom">From</label>
+          <input id="dateFrom" type="date" />
+          <label for="dateTo">To</label>
+          <input id="dateTo" type="date" />
+        </div>
+      </div>
+
+      <!-- <div id="chart-container-scatterplot" class="picasso-scatterplot"></div> -->
+      <div id="chart-container-barchart" class="picasso-barchart"></div>
+    </div>
+    <div class="container" ng-if="$ctrl.connected">
+      <div></div>
+      <div id="chart-container-linechart" class="picasso-linechart"></div>
+    </div>
+  </div>
+  <div  ng-class="{ 'hide' : !$ctrl.logined}">
+  <div class="footer" ng-class="{'expanded': showFooter}" style="z-index: 1000;">
+    <div class="">
+      <span class="lui-icon--top" ng-class="{'expanded': showFooter}" ng-click="toggleFooter()"></span>
+      <span class="footer-title">Caller Information</span>
+      <button ng-click="PrintDetails()" ng-show="dataSelected">Print</button>
+    </div>
+    <div class="info-wrapper" ng-show="dataSelected">
+      <!-- <img class="movie-image"> -->
+
+      <div class="movie-info" style="width: 20%;">
+        <span class="info-title">Caller Name: </span>
+        <span class="movie-description authCodeDesc"></span>
+      </div>
+      <div class="movie-info" style="width: 20%;">
+        <span class="info-title">Total Duration (mins): </span>
+        <span class="movie-description duration"></span>
+      </div>
+
+      <div class="movie-info" style="width: 100%;">
+        <span class="info-title">Calls: </span>
+        <span class="movie-description table-calls"></span>
+      </div>
+      
+    </div>
+    <div class="no-movie-selected" ng-show="!dataSelected">No caller has been selected</div>
+  </div>
 </div>
 
-<div class="error" ng-if="!$ctrl.connected && !$ctrl.connecting">
-  <div class="error-wrapper">
-    <span class="lui-icon--warning"></span>
-    <span class="error-title">Oops! Something went wrong.</span>
-    <span>{{$ctrl.error ? $ctrl.error : "Unexpected error"}}</span>
+  <div class="error" ng-if="!$ctrl.connected && !$ctrl.connecting">
+    <div class="error-wrapper">
+      <span class="lui-icon--warning"></span>
+      <span class="error-title">Oops! Something went wrong.</span>
+      <span>{{$ctrl.error ? $ctrl.error : "Unexpected error"}}</span>
+    </div>
+  </div>
+
+<div ng-class="{ 'hide' : $ctrl.logined}">
+  <div class="content">
+    <div class="container">
+
+      <p ng-class="{ 'hide' : $ctrl.validEP}" style="color: red;">Invalid Email or Password!</p>
+      <input type="text" id="email" placeholder="Email"/>
+      <input type="password" id="password" placeholder="Password"/>
+      <button ng-click="login()">Login</button>
+    </div>
   </div>
 </div>
