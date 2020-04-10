@@ -53,7 +53,8 @@ angular.module('app', []).component('app', {
 
       $scope.dataSelected = true;
       const layout = await this.getCallInfo();
-      Barchart.showCallDetails(layout,value,chartFilter);
+      const layout2 = await this.getCallInfo2();
+      Barchart.showCallDetails(layout,value,chartFilter,layout2);
       $scope.showFooter = true;
       $scope.$digest();
     };
@@ -286,6 +287,7 @@ angular.module('app', []).component('app', {
           {expr: "TimeStamp(Date#('19700101', 'YYYYMMDD') + ([dateTimeOrigination] / 86400))", name:'DateTime'},
           {expr: "Year(TimeStamp(Date#('19700101', 'YYYYMMDD') + ([dateTimeOrigination] / 86400)))", name:'Year'},
           {src: 'duration', name: 'Duration' },
+          {src: 'originalCalledPartyNumber', name: 'PhoneNumber'},
           {src: 'authCodeDescription', name: 'AuthCodeDescription',},
           {src: 'originalCalledPartyNumberPartition', name: 'CallType'}
         ]
@@ -484,9 +486,14 @@ angular.module('app', []).component('app', {
               qFieldDefs: ['CallType']
             },
           },
-                  {
+          {
             qDef: {
               qFieldDefs: ['Duration']
+            },
+          },
+          {
+            qDef: {
+              qFieldDefs: ['PhoneNumber']
             },
           }
           
@@ -499,11 +506,8 @@ angular.module('app', []).component('app', {
             qSortBy: {
               qSortByNumeric: 1,
             },
-          }
-        ],
-          qInitialDataFetch: [{
-            qTop: 0, qHeight: 2500, qLeft: 0, qWidth: 4,
           }],
+          qInitialDataFetch: [{qHeight: 2500, qWidth: 4 }],
           qSuppressZero: true,
           qSuppressMissing: true,
         },
@@ -511,6 +515,55 @@ angular.module('app', []).component('app', {
       const model = await app.createSessionObject(fullDataProperties);
       return model.getLayout();
     };
+
+    this.getCallInfo2 = async () => {
+      const fullDataProperties = {
+        qInfo: {
+          qType: 'visualization',
+          qId: '',
+        },
+        type: 'my-picasso-barchart',
+        labels: true,
+        qHyperCubeDef: {
+          qDimensions: [{
+            qDef: {
+              qFieldDefs: ['AuthCodeDescription'],
+            },
+          },
+          {
+            qDef: {
+              qFieldDefs: ['Duration']
+            },
+          },
+          {
+            qDef: {
+              qFieldDefs: ['PhoneNumber']
+            },
+          }
+          
+        ],
+          qMeasures: [{
+            qDef: {
+              qDef: '[Duration]',
+              qLabel: 'Duration'
+            },
+            qSortBy: {
+              qSortByNumeric: 1,
+            },
+          }],
+          qInitialDataFetch: [{qHeight: 2500, qWidth: 3 }],
+          qSuppressZero: true,
+          qSuppressMissing: true,
+        },
+      };
+      const model = await app.createSessionObject(fullDataProperties);
+      return model.getLayout();
+    };
+
+
+
+
+
   }],
   template,
 });

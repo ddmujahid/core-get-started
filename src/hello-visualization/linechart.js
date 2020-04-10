@@ -71,8 +71,6 @@ export default class Linechart {
     var month = date.getMonth() + 1;
     return (Math.ceil(month / 3));
   }
-  console.log(dataMatrix);
-  console.log(+new Date(2020,9,2))
 
     var groupBy = {};
     var result = dataMatrix.reduce(function(r, o) {

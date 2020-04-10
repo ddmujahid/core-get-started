@@ -422,7 +422,7 @@ export default class Barchart {
 
   }
 
-  static showCallDetails(layout, value,myfilter) {
+  static showCallDetails(layout, value,myfilter,layout2) {
 
     if (!(layout.qHyperCube
       && layout.qHyperCube.qDataPages
@@ -432,20 +432,38 @@ export default class Barchart {
       return;
     }
 
+    console.log(layout);
+    console.log(layout2);
 
+    var length=layout.qHyperCube.qDataPages[0].qMatrix.length;
+    var mapData=[];
+    for(let i=0;i<length;i++){
+        var item=layout.qHyperCube.qDataPages[0].qMatrix[i];
+        var item2=layout2.qHyperCube.qDataPages[0].qMatrix[i];
+        var row={
+          caller: item[0].qText,
+          datetime: item[1].qText,
+          origion: item[2].qText,
+          duration: item[3].qNum,
+          number: item2[2].qNum+"",
+        }
+        mapData.push(row);
+    }
 
-    const data = layout.qHyperCube.qDataPages[0].qMatrix.map((item) => ({
-      caller: item[0].qText,
-      datetime: item[1].qText,
-      origion: item[2].qText,
-      duration: item[3].qNum,
-      // originalCalledPN: item[4].qText,
-      // originalCalledPNPartition: item[5].qText,
-      // finalCalledPNPartition: item[6].qText,
-      // duration: item[7].qText,
-      // AuthCodeDescription: item[8].qText,
-      // AuthCodeValue: item[9].qText
-    }));
+var data=mapData;
+
+    // const data = layout.qHyperCube.qDataPages[0].qMatrix.map((item) => ({
+    //   caller: item[0].qText,
+    //   datetime: item[1].qText,
+    //   origion: item[2].qText,
+    //   duration: item[3].qNum,
+    //   // originalCalledPN: item[4].qText,
+    //   // originalCalledPNPartition: item[5].qText,
+    //   // finalCalledPNPartition: item[6].qText,
+    //   // duration: item[7].qText,
+    //   // AuthCodeDescription: item[8].qText,
+    //   // AuthCodeValue: item[9].qText
+    // }));
 
     let callsTable = "";
 
@@ -481,10 +499,10 @@ export default class Barchart {
               callsTable += "<td>" + d.datetime + "</td>";
               callsTable += "<td>" + (d.origion == 'CDC_International_PT_FAC' ? 'International' : 'National') + "</td>";
               callsTable += "<td>" + parseFloat(((d.duration) / 60)).toFixed(2) + "</td>";
+              callsTable += "<td>" + d.number + "</td>";
               callsTable += "</tr>";
 
               totalDuration = totalDuration + d.duration;
-              console.log(d.duration);
             }
 
           }
@@ -496,7 +514,7 @@ export default class Barchart {
 
 
     });
-    let fulltable = "<table><tr><th>Date & Time</th><th>Origion</th><th>Duration (mins)</th></tr>" + callsTable + "</table>";
+    let fulltable = "<table><tr><th>Date & Time</th><th>Origion</th><th>Duration (mins)</th><th>Phone Number</th></tr>" + callsTable + "</table>";
 
     document.getElementsByClassName('table-calls')[0].innerHTML = fulltable;
     document.getElementsByClassName('authCodeDesc')[0].innerHTML = caller;
