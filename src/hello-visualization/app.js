@@ -490,11 +490,6 @@ angular.module('app', []).component('app', {
             qDef: {
               qFieldDefs: ['Duration']
             },
-          },
-          {
-            qDef: {
-              qFieldDefs: ['PhoneNumber']
-            },
           }
           
         ],
@@ -539,7 +534,12 @@ angular.module('app', []).component('app', {
             qDef: {
               qFieldDefs: ['PhoneNumber']
             },
-          }
+          },
+          {
+            qDef: {
+              qFieldDefs: ['DateTime']
+            },
+          },
           
         ],
           qMeasures: [{
@@ -551,7 +551,7 @@ angular.module('app', []).component('app', {
               qSortByNumeric: 1,
             },
           }],
-          qInitialDataFetch: [{qHeight: 2500, qWidth: 3 }],
+          qInitialDataFetch: [{qHeight: 2500, qWidth: 4 }],
           qSuppressZero: true,
           qSuppressMissing: true,
         },

@@ -432,14 +432,12 @@ export default class Barchart {
       return;
     }
 
-    console.log(layout);
-    console.log(layout2);
-
     var length=layout.qHyperCube.qDataPages[0].qMatrix.length;
     var mapData=[];
     for(let i=0;i<length;i++){
         var item=layout.qHyperCube.qDataPages[0].qMatrix[i];
         var item2=layout2.qHyperCube.qDataPages[0].qMatrix[i];
+
         var row={
           caller: item[0].qText,
           datetime: item[1].qText,
@@ -469,8 +467,12 @@ var data=mapData;
 
     let caller = value;
     let totalDuration = 0;
-    data.forEach((d) => {
 
+    
+
+
+    data.forEach((d) => {
+      
 
       if (d.origion == "CDC_NationalMobile_PT_FAC" || d.origion == "CDC_International_PT_FAC") {
         if (
@@ -478,6 +480,8 @@ var data=mapData;
           (d.origion == "CDC_International_PT_FAC" && myfilter.origion == "International") ||
           myfilter.origion == "NationalAndInternational"
         ) {
+
+          console.log(data.length);
 
           var dt = new Date(d.datetime);
           dt.setHours(0);
@@ -492,6 +496,7 @@ var data=mapData;
             success = false;
           }
           if (success) {
+
 
             if (((d.caller == undefined) ? "Anonymous" : d.caller) == value) {
 
