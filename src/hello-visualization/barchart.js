@@ -468,7 +468,7 @@ var data=mapData;
     let caller = value;
     let totalDuration = 0;
 
-    
+    console.log(caller);
 
 
     data.forEach((d) => {
@@ -480,8 +480,6 @@ var data=mapData;
           (d.origion == "CDC_International_PT_FAC" && myfilter.origion == "International") ||
           myfilter.origion == "NationalAndInternational"
         ) {
-
-          console.log(data.length);
 
           var dt = new Date(d.datetime);
           dt.setHours(0);

@@ -442,7 +442,7 @@ angular.module('app', []).component('app', {
         $scope.login = () => {
           var email= document.getElementById("email").value;
           var password= document.getElementById("password").value;
-          if(email=="user@gmail.com"&&password=="123"){
+          if(email=="admin@roshn.com"&&password=="admin"){
             LoginNow();
           }
           else{
